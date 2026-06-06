@@ -1,0 +1,38 @@
+type Expense {
+  id: ID!
+  merchant: String!
+  date: String!
+  amount: Float!
+  currency: String!
+  category: String!
+  status: String!
+  source: String!
+  confidence: Float!
+  policyNote: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+input ExpenseInput {
+  merchant: String!
+  date: String!
+  amount: Float!
+  currency: String!
+  category: String!
+  status: String!
+  source: String!
+  confidence: Float!
+  policyNote: String
+}
+
+type Query {
+  listExpenses: [Expense!]!
+}
+
+type Mutation {
+  createExpense(input: ExpenseInput!): Expense!
+}
+
+type Subscription {
+  onCreateExpense: Expense @aws_subscribe(mutations: ["createExpense"])
+}

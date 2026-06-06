@@ -1,0 +1,19 @@
+{
+  "name": "autoexpense",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Automated receipt-to-expense pipeline built on AWS serverless services.",
+  "workspaces": [
+    "web",
+    "services",
+    "infra"
+  ],
+  "scripts": {
+    "build:web": "npm run build --workspace web",
+    "dev:web": "npm run dev --workspace web",
+    "build:services": "npm run build --workspace services",
+    "synth": "npm run synth --workspace infra",
+    "deploy": "npm run deploy --workspace infra"
+  },
+  "license": "MIT"
+}

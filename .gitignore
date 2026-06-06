@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# build output
+dist/
+build/
+**/dist/
+**/build/
+
+# CDK
+infra/cdk.out/
+cdk.out/
+*.js.map
+
+# env & secrets (never commit these)
+.env
+.env.*
+*.pem
+aws-exports.js
+src/amplifyconfiguration.json
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
