@@ -42,26 +42,26 @@ runs on any device with no install step, and keeps working with no connection.
 
 ```mermaid
 flowchart LR
-    subgraph Client["📱 Client (any device)"]
-        PWA["Offline-first PWA<br/>(React + Workbox + IndexedDB)"]
+    subgraph Client["Client - any device"]
+        PWA["Offline-first PWA<br/>React + Workbox + IndexedDB"]
     end
 
     subgraph Edge["AWS Edge"]
-        CF["CloudFront + S3<br/>(static hosting)"]
-        COG["Cognito<br/>(auth)"]
+        CF["CloudFront + S3<br/>static hosting"]
+        COG["Cognito auth"]
     end
 
     subgraph Ingest["Ingestion sources"]
-        OB["Open Banking<br/>(Plaid / TrueLayer)"]
-        EM["Email e-receipts<br/>(SES inbound)"]
+        OB["Open Banking<br/>Plaid / TrueLayer"]
+        EM["Email e-receipts<br/>SES inbound"]
         IMG["Photo / PDF upload"]
     end
 
     subgraph Core["Event-driven core"]
         API["AppSync + API Gateway"]
-        SF["Step Functions<br/>(orchestration)"]
+        SF["Step Functions<br/>orchestration"]
         TX["Textract<br/>AnalyzeExpense"]
-        BR["Bedrock<br/>(categorise / match)"]
+        BR["Bedrock<br/>categorise / match"]
         DDB[("DynamoDB")]
         S3R[("S3 receipts")]
     end
