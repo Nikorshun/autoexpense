@@ -27,14 +27,14 @@ every component is serverless and scales to zero when idle.
 
 ```mermaid
 flowchart TB
-    subgraph Free["🟢 Free at demo scale (scale-to-zero)"]
+    subgraph Free["Free at demo scale - scale-to-zero"]
         A["Lambda · DynamoDB · S3 · CloudFront<br/>API Gateway · SQS · SNS · EventBridge<br/>Step Functions · Cognito · CloudWatch · X-Ray · AppSync"]
     end
-    subgraph Cheap["🟡 Cheap per-use (cents at demo scale)"]
-        B["Textract (per page) · Comprehend · SES inbound"]
+    subgraph Cheap["Cheap per-use - cents at demo scale"]
+        B["Textract per page · Comprehend · SES inbound"]
     end
-    subgraph Watch["🔴 No free tier — design around it"]
-        C["Bedrock (per token) · Secrets Manager (per secret)"]
+    subgraph Watch["No free tier - design around it"]
+        C["Bedrock per token · Secrets Manager per secret"]
     end
 ```
 

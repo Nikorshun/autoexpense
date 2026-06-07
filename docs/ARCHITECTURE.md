@@ -29,33 +29,28 @@ Three principles drive every choice below.
 
 ```mermaid
 flowchart TB
-    subgraph CLIENT["📱  Client — any device, online or offline"]
-        direction TB
+    subgraph CLIENT["Client - any device, online or offline"]
         PWA["Progressive Web App<br/>React + TypeScript<br/>Workbox service worker<br/>IndexedDB local store"]
     end
 
-    subgraph DELIVERY["🌍  Content delivery & identity"]
-        direction TB
+    subgraph DELIVERY["Content delivery and identity"]
         S3W["S3<br/>static site bucket"]
         CF["CloudFront<br/>global CDN + TLS"]
         COG["Cognito<br/>user pools + federated<br/>Google / Apple sign-in"]
     end
 
-    subgraph API["🔌  API layer"]
-        direction TB
-        APPSYNC["AppSync (GraphQL)<br/>offline sync + subscriptions"]
-        APIGW["API Gateway (REST)<br/>webhooks & integrations"]
+    subgraph API["API layer"]
+        APPSYNC["AppSync GraphQL<br/>offline sync + subscriptions"]
+        APIGW["API Gateway REST<br/>webhooks and integrations"]
     end
 
-    subgraph INGEST["📥  Ingestion (the 'automatic' part)"]
-        direction TB
+    subgraph INGEST["Ingestion - the automatic part"]
         OB["Open Banking link<br/>Plaid / TrueLayer"]
-        SES["SES inbound email<br/>(e-receipts)"]
+        SES["SES inbound email<br/>e-receipts"]
         UP["Photo / PDF upload"]
     end
 
-    subgraph CORE["⚙️  Event-driven processing core"]
-        direction TB
+    subgraph CORE["Event-driven processing core"]
         EB["EventBridge<br/>event bus + schedules"]
         SQS["SQS<br/>buffering / retries"]
         SF["Step Functions<br/>orchestrates the pipeline"]
@@ -65,31 +60,27 @@ flowchart TB
         L4["Lambda: submit"]
     end
 
-    subgraph AI["🧠  Managed AI"]
-        direction TB
+    subgraph AI["Managed AI"]
         TX["Textract<br/>AnalyzeExpense"]
         CMP["Comprehend<br/>entity / language"]
         BR["Bedrock<br/>categorise + match policy"]
     end
 
-    subgraph DATA["💾  State"]
-        direction TB
+    subgraph DATA["State"]
         DDB[("DynamoDB<br/>expenses / transactions")]
         S3R[("S3<br/>receipt files")]
     end
 
-    subgraph OUT["📤  Output"]
-        direction TB
+    subgraph OUT["Output"]
         SNS["SNS / Pinpoint<br/>push + email alerts"]
         EXT["Expense system<br/>QuickBooks / Xero / Concur"]
     end
 
-    subgraph OPS["🔭  Cross-cutting"]
-        direction TB
+    subgraph OPS["Cross-cutting"]
         CW["CloudWatch + X-Ray"]
         IAM["IAM least-privilege"]
-        SSM["SSM Parameter Store<br/>(free secrets)"]
-        BUD["AWS Budgets<br/>($1 alarm)"]
+        SSM["SSM Parameter Store<br/>free secrets"]
+        BUD["AWS Budgets<br/>1 dollar alarm"]
     end
 
     PWA --> CF --> S3W
@@ -211,10 +202,10 @@ same device" idea.
 flowchart LR
     subgraph Device["On-device"]
         UI["PWA UI"]
-        DS["Amplify DataStore<br/>(IndexedDB)"]
-        SW["Workbox service worker<br/>(cached app shell)"]
+        DS["Amplify DataStore<br/>IndexedDB"]
+        SW["Workbox service worker<br/>cached app shell"]
     end
-    subgraph Cloud["AWS (when reachable)"]
+    subgraph Cloud["AWS - when reachable"]
         AS["AppSync"]
         DDB[("DynamoDB")]
     end

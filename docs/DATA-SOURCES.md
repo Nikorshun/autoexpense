@@ -14,9 +14,9 @@ constraints are. This document is the answer you'd give when an interviewer asks
 
 ```mermaid
 flowchart TB
-    Wallet["Phone wallet<br/>(Apple Pay / Google Pay)"]
-    App["A third-party app<br/>(like AutoExpense)"]
-    Wallet -. ❌ no transaction/receipt API .-> App
+    Wallet["Phone wallet<br/>Apple Pay / Google Pay"]
+    App["A third-party app<br/>like AutoExpense"]
+    Wallet -. no transaction or receipt API .-> App
 ```
 
 - **Apple Pay.** Apple exposes **no API** that lets a third-party app read a user's Apple Pay
@@ -44,11 +44,11 @@ stands on supported, consented ground.
 ```mermaid
 flowchart TB
     subgraph Sources["What we can actually use"]
-        OB["① Open Banking<br/>(Plaid / TrueLayer)"]
-        EM["② Email e-receipts<br/>(SES inbound)"]
-        IMG["③ Photo / PDF<br/>(Textract fallback)"]
+        OB["1 - Open Banking<br/>Plaid / TrueLayer"]
+        EM["2 - Email e-receipts<br/>SES inbound"]
+        IMG["3 - Photo / PDF<br/>Textract fallback"]
     end
-    OB -->|every card spend:<br/>merchant, amount, date| RC["Reconciliation"]
+    OB -->|every card spend| RC["Reconciliation"]
     EM -->|full itemised receipt| RC
     IMG -->|when nothing else exists| RC
     RC --> EXP["One clean expense"]
@@ -96,7 +96,7 @@ flowchart TB
     Phone["Phone wallet data"]
     BT(["Web Bluetooth"])
     Laptop["Laptop web app"]
-    Phone -. ❌ OS does not expose<br/>wallet data over BT .-> BT
+    Phone -. OS does not expose<br/>wallet data over BT .-> BT
     BT -. cannot reach .-> Laptop
 ```
 

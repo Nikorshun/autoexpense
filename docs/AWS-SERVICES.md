@@ -13,7 +13,7 @@ The services are grouped by the layer they live in. The master picture is in
 
 ```mermaid
 flowchart LR
-    A["1 · Delivery & Identity"] --> B["2 · API"]
+    A["1 · Delivery and Identity"] --> B["2 · API"]
     B --> C["3 · Ingestion"]
     C --> D["4 · Processing core"]
     D --> E["5 · Managed AI"]
@@ -56,7 +56,7 @@ over HTTPS everywhere, which service workers require.
 
 ```mermaid
 flowchart LR
-    User["User (anywhere)"] --> Edge["CloudFront edge"]
+    User["User anywhere"] --> Edge["CloudFront edge"]
     Edge -->|cache hit| User
     Edge -->|cache miss| S3[("S3")]
 ```
@@ -229,9 +229,9 @@ debugging and for explaining the system in an interview.
 
 ```mermaid
 flowchart LR
-    Start([Start]) --> Ex["Extract (Textract)"]
-    Ex --> En["Enrich (Comprehend/Bedrock)"]
-    En --> Ma["Match policy (Bedrock)"]
+    Start([Start]) --> Ex["Extract - Textract"]
+    Ex --> En["Enrich - Comprehend or Bedrock"]
+    En --> Ma["Match policy - Bedrock"]
     Ma -->|ok| Su["Submit"]
     Ma -->|low confidence| Hu["Flag for review"]
     Su --> End([Done])
@@ -274,8 +274,8 @@ between reading a receipt and understanding one.
 
 ```mermaid
 flowchart LR
-    Img["Receipt image/PDF"] --> TX["Textract AnalyzeExpense"]
-    TX --> F["{ vendor, date, total, tax, lineItems[] }"]
+    Img["Receipt image or PDF"] --> TX["Textract AnalyzeExpense"]
+    TX --> F["vendor, date, total, tax, line items"]
 ```
 
 ### Amazon Comprehend
@@ -356,7 +356,7 @@ no code.
 flowchart LR
     Up["Upload / email"] --> S3[("S3 private bucket")]
     S3 -->|key reference| DDB[("DynamoDB")]
-    S3 -. lifecycle .-> GL["Glacier (archive)"]
+    S3 -. lifecycle .-> GL["Glacier archive"]
 ```
 
 ---
@@ -437,7 +437,7 @@ disaster; Parameter Store keeps credentials out of the codebase entirely.
 
 ```mermaid
 flowchart LR
-    L["Lambda"] -->|fetch at runtime| SSM["SSM Parameter Store (free)"]
+    L["Lambda"] -->|fetch at runtime| SSM["SSM Parameter Store - free"]
     SSM --> Keys["Plaid key · OAuth tokens"]
 ```
 
@@ -457,7 +457,7 @@ operating it and for demonstrating production-readiness on your CV.
 flowchart LR
     Pipe["All services"] --> CW["CloudWatch logs/metrics"]
     CW --> AL["Alarms"]
-    Pipe --> XR["X-Ray trace (one receipt)"]
+    Pipe --> XR["X-Ray trace - one receipt"]
 ```
 
 ### AWS CDK (infrastructure-as-code)
@@ -474,7 +474,7 @@ difference between "I clicked around the console" and "here's my reproducible ar
 
 ```mermaid
 flowchart LR
-    TS["CDK (TypeScript)"] --> CFN["CloudFormation"]
+    TS["CDK - TypeScript"] --> CFN["CloudFormation"]
     CFN --> AWS["All AWS resources"]
 ```
 
