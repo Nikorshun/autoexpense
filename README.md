@@ -1,5 +1,8 @@
 # AutoExpense
 
+[![CI](https://github.com/Nikorshun/autoexpense/actions/workflows/ci.yml/badge.svg)](https://github.com/Nikorshun/autoexpense/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **Automated receipt-to-expense pipeline, built entirely on AWS serverless services.**
 
 AutoExpense removes the manual work from expense reporting. Receipts are captured
