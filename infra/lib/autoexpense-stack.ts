@@ -201,8 +201,14 @@ export class AutoExpenseStack extends cdk.Stack {
     });
 
     // ---------------------------------------------------------------------
-    // 9. Cost guardrail — $1/month budget alarm (free-tier safety net)
+    // 9. Cost guardrail — low budget alarm (free-tier safety net)
+    //    Budgets ALERT, they do not hard-stop spend. This warns early, on both
+    //    actual and forecasted cost, so anything beyond ~$1 pings you at once.
     // ---------------------------------------------------------------------
+    const budgetSubscribers = props.notifyEmail
+      ? [{ subscriptionType: 'EMAIL', address: props.notifyEmail }]
+      : undefined;
+
     new budgets.CfnBudget(this, 'MonthlyBudget', {
       budget: {
         budgetName: 'autoexpense-monthly',
@@ -210,16 +216,37 @@ export class AutoExpenseStack extends cdk.Stack {
         timeUnit: 'MONTHLY',
         budgetLimit: { amount: 1, unit: 'USD' },
       },
-      notificationsWithSubscribers: props.notifyEmail
+      notificationsWithSubscribers: budgetSubscribers
         ? [
             {
+              // early canary: 50% of $1 actual spend
               notification: {
                 notificationType: 'ACTUAL',
                 comparisonOperator: 'GREATER_THAN',
-                threshold: 80,
+                threshold: 50,
                 thresholdType: 'PERCENTAGE',
               },
-              subscribers: [{ subscriptionType: 'EMAIL', address: props.notifyEmail }],
+              subscribers: budgetSubscribers,
+            },
+            {
+              // forecasted to exceed the $1 budget this month
+              notification: {
+                notificationType: 'FORECASTED',
+                comparisonOperator: 'GREATER_THAN',
+                threshold: 100,
+                thresholdType: 'PERCENTAGE',
+              },
+              subscribers: budgetSubscribers,
+            },
+            {
+              // actually exceeded $1
+              notification: {
+                notificationType: 'ACTUAL',
+                comparisonOperator: 'GREATER_THAN',
+                threshold: 100,
+                thresholdType: 'PERCENTAGE',
+              },
+              subscribers: budgetSubscribers,
             },
           ]
         : undefined,
