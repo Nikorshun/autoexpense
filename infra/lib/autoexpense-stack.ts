@@ -176,6 +176,18 @@ export class AutoExpenseStack extends cdk.Stack {
       runtime: appsync.FunctionRuntime.JS_1_0_0,
       code: appsync.Code.fromInline(CREATE_RESOLVER),
     });
+    expensesDs.createResolver('UpdateExpenseResolver', {
+      typeName: 'Mutation',
+      fieldName: 'updateExpense',
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      code: appsync.Code.fromInline(UPDATE_RESOLVER),
+    });
+    expensesDs.createResolver('DeleteExpenseResolver', {
+      typeName: 'Mutation',
+      fieldName: 'deleteExpense',
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      code: appsync.Code.fromInline(DELETE_RESOLVER),
+    });
 
     // ---------------------------------------------------------------------
     // 8. Web hosting — private S3 + CloudFront (1 TB/month always free)
@@ -256,6 +268,7 @@ export class AutoExpenseStack extends cdk.Stack {
     // Outputs — everything the web app and ops need
     // ---------------------------------------------------------------------
     new cdk.CfnOutput(this, 'WebUrl', { value: `https://${distribution.domainName}` });
+    new cdk.CfnOutput(this, 'DistributionId', { value: distribution.distributionId });
     new cdk.CfnOutput(this, 'GraphQlUrl', { value: api.graphqlUrl });
     new cdk.CfnOutput(this, 'UserPoolId', { value: userPool.userPoolId });
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: userPoolClient.userPoolClientId });
@@ -303,5 +316,46 @@ export function request(ctx) {
 }
 export function response(ctx) {
   return ctx.result;
+}
+`;
+
+const UPDATE_RESOLVER = `
+import { util } from '@aws-appsync/utils';
+export function request(ctx) {
+  const sub = ctx.identity.sub;
+  const id = ctx.args.id;
+  const input = ctx.args.input;
+  const now = util.time.nowISO8601();
+  const item = Object.assign({}, input, {
+    id: id,
+    userId: sub,
+    createdAt: input.createdAt || now,
+    updatedAt: now,
+  });
+  return {
+    operation: 'PutItem',
+    key: util.dynamodb.toMapValues({ PK: 'USER#' + sub, SK: 'EXPENSE#' + input.date + '#' + id }),
+    attributeValues: util.dynamodb.toMapValues(item),
+  };
+}
+export function response(ctx) {
+  return ctx.result;
+}
+`;
+
+const DELETE_RESOLVER = `
+import { util } from '@aws-appsync/utils';
+export function request(ctx) {
+  const sub = ctx.identity.sub;
+  return {
+    operation: 'DeleteItem',
+    key: util.dynamodb.toMapValues({
+      PK: 'USER#' + sub,
+      SK: 'EXPENSE#' + ctx.args.date + '#' + ctx.args.id,
+    }),
+  };
+}
+export function response(ctx) {
+  return ctx.args.id;
 }
 `;

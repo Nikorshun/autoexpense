@@ -1,46 +1,56 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { LocalExpenseRepository } from '../data/localRepository';
-import { SEED_EXPENSES } from '../data/seed';
+import { AppSyncExpenseRepository } from '../data/appsyncRepository';
 import type { Expense } from '../types';
 
-const repo = new LocalExpenseRepository();
+const repo = new AppSyncExpenseRepository();
 
 /**
- * Loads expenses from the offline store, seeding sample data on first run, and
- * exposes the mutations the UI needs. Swapping `repo` for an AppSync-backed
- * repository is all that's required to go from offline-only to fully synced.
+ * Loads expenses from the live AppSync/DynamoDB backend and exposes the
+ * mutations the UI needs. Each call is authenticated as the signed-in Cognito
+ * user, so the list only ever contains that user's data.
  */
 export function useExpenses() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const list = await repo.list();
-    setExpenses(list);
+    try {
+      const list = await repo.list();
+      setExpenses(list);
+      setError(null);
+    } catch (e) {
+      console.error(e);
+      setError('Could not reach the cloud. Check your connection and try again.');
+    }
   }, []);
 
   useEffect(() => {
     (async () => {
-      const existing = await repo.list();
-      if (existing.length === 0) {
-        await Promise.all(SEED_EXPENSES.map((e) => repo.save(e)));
-      }
       await refresh();
       setLoading(false);
     })();
   }, [refresh]);
 
-  const save = useCallback(
+  const add = useCallback(
     async (expense: Expense) => {
-      await repo.save(expense);
+      await repo.create(expense);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const update = useCallback(
+    async (expense: Expense) => {
+      await repo.update(expense);
       await refresh();
     },
     [refresh],
   );
 
   const remove = useCallback(
-    async (id: string) => {
-      await repo.remove(id);
+    async (expense: Expense) => {
+      await repo.remove(expense);
       await refresh();
     },
     [refresh],
@@ -58,5 +68,5 @@ export function useExpenses() {
     return { total, needsReview, automationRate, count: expenses.length };
   }, [expenses]);
 
-  return { expenses, loading, save, remove, refresh, stats };
+  return { expenses, loading, error, add, update, remove, refresh, stats };
 }

@@ -38,21 +38,24 @@ export class LocalExpenseRepository implements ExpenseRepository {
     return all.sort((a, b) => b.date.localeCompare(a.date));
   }
 
-  async get(id: string): Promise<Expense | undefined> {
-    const db = await this.dbPromise;
-    return db.get('expenses', id);
+  async create(expense: Expense): Promise<Expense> {
+    return this.put(expense);
   }
 
-  async save(expense: Expense): Promise<Expense> {
+  async update(expense: Expense): Promise<Expense> {
+    return this.put(expense);
+  }
+
+  private async put(expense: Expense): Promise<Expense> {
     const db = await this.dbPromise;
     const next: Expense = { ...expense, updatedAt: new Date().toISOString() };
     await db.put('expenses', next);
     return next;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(expense: Expense): Promise<void> {
     const db = await this.dbPromise;
-    await db.delete('expenses', id);
+    await db.delete('expenses', expense.id);
   }
 
   async count(): Promise<number> {

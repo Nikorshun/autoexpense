@@ -23,6 +23,7 @@ input ExpenseInput {
   source: String!
   confidence: Float!
   policyNote: String
+  createdAt: String
 }
 
 type Query {
@@ -31,6 +32,8 @@ type Query {
 
 type Mutation {
   createExpense(input: ExpenseInput!): Expense!
+  updateExpense(id: ID!, input: ExpenseInput!): Expense!
+  deleteExpense(id: ID!, date: String!): ID
 }
 
 type Subscription {

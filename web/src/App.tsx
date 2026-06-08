@@ -5,16 +5,21 @@ import { ExpenseList } from './components/ExpenseList';
 import { simulateIncomingExpense } from './utils/simulate';
 import type { Expense } from './types';
 
-export default function App() {
+interface AppProps {
+  signOut?: () => void;
+  userEmail?: string;
+}
+
+export default function App({ signOut, userEmail }: AppProps) {
   const online = useOnlineStatus();
-  const { expenses, loading, save, remove, stats } = useExpenses();
+  const { expenses, loading, error, add, update, remove, stats } = useExpenses();
 
   const handleSimulate = async () => {
-    await save(simulateIncomingExpense());
+    await add(simulateIncomingExpense());
   };
 
   const handleApprove = async (e: Expense) => {
-    await save({ ...e, status: 'submitted', policyNote: 'Approved by user.' });
+    await update({ ...e, status: 'submitted', policyNote: 'Approved by user.' });
   };
 
   return (
@@ -24,9 +29,17 @@ export default function App() {
           <img src="/favicon.svg" alt="" className="brand__logo" width={28} height={28} />
           <span className="brand__name">AutoExpense</span>
         </div>
-        <div className={`conn ${online ? 'conn--online' : 'conn--offline'}`}>
-          <span className="conn__dot" aria-hidden="true" />
-          {online ? 'Online · synced' : 'Offline · changes saved locally'}
+        <div className="topbar__right">
+          <div className={`conn ${online ? 'conn--online' : 'conn--offline'}`}>
+            <span className="conn__dot" aria-hidden="true" />
+            {online ? 'Online · synced' : 'Offline'}
+          </div>
+          {userEmail && <span className="user">{userEmail}</span>}
+          {signOut && (
+            <button className="btn btn--small btn--ghost" onClick={signOut}>
+              Sign out
+            </button>
+          )}
         </div>
       </header>
 
@@ -51,8 +64,10 @@ export default function App() {
           automationRate={stats.automationRate}
         />
 
+        {error && <p className="error">{error}</p>}
+
         {loading ? (
-          <p className="empty">Loading your offline store…</p>
+          <p className="empty">Loading your expenses from the cloud…</p>
         ) : (
           <ExpenseList
             expenses={expenses}
@@ -64,8 +79,8 @@ export default function App() {
 
       <footer className="footer">
         <span>
-          Offline-first PWA · data stored on-device, syncs via AWS AppSync when
-          online.
+          Live on AWS · Cognito auth, AppSync GraphQL, DynamoDB storage. Data is
+          scoped to your account.
         </span>
       </footer>
     </div>

@@ -5,7 +5,7 @@ import { StatusBadge } from './StatusBadge';
 interface Props {
   expenses: Expense[];
   onApprove: (e: Expense) => void;
-  onDelete: (id: string) => void;
+  onDelete: (e: Expense) => void;
 }
 
 export function ExpenseList({ expenses, onApprove, onDelete }: Props) {
@@ -41,7 +41,7 @@ export function ExpenseList({ expenses, onApprove, onDelete }: Props) {
               )}
               <button
                 className="btn btn--small btn--ghost"
-                onClick={() => onDelete(e.id)}
+                onClick={() => onDelete(e)}
                 aria-label={`Delete ${e.merchant}`}
               >
                 Delete
