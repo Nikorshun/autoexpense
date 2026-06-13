@@ -213,6 +213,53 @@ export class AutoExpenseStack extends cdk.Stack {
     });
 
     // ---------------------------------------------------------------------
+    // 8b. Open Banking connector (GoCardless Bank Account Data — free tier)
+    //     Secrets live in SSM Parameter Store (free); never in code/browser.
+    // ---------------------------------------------------------------------
+    const bankingFn = makeFn('BankingConnectorFn', 'bankingConnector.ts', {
+      TABLE_NAME: table.tableName,
+      WEB_URL: `https://${distribution.domainName}`,
+      GC_SECRET_ID_PARAM: '/autoexpense/gocardless/secret_id',
+      GC_SECRET_KEY_PARAM: '/autoexpense/gocardless/secret_key',
+    });
+    table.grantWriteData(bankingFn);
+    bankingFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ['ssm:GetParameter'],
+        resources: [
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/autoexpense/gocardless/*`,
+        ],
+      }),
+    );
+    bankingFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ['kms:Decrypt'],
+        resources: ['*'],
+        conditions: { StringEquals: { 'kms:ViaService': `ssm.${this.region}.amazonaws.com` } },
+      }),
+    );
+
+    const bankingDs = api.addLambdaDataSource('BankingDataSource', bankingFn);
+    bankingDs.createResolver('ListInstitutionsResolver', {
+      typeName: 'Query',
+      fieldName: 'listInstitutions',
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      code: appsync.Code.fromInline(LAMBDA_RESOLVER),
+    });
+    bankingDs.createResolver('ConnectBankResolver', {
+      typeName: 'Mutation',
+      fieldName: 'connectBank',
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      code: appsync.Code.fromInline(LAMBDA_RESOLVER),
+    });
+    bankingDs.createResolver('SyncBankResolver', {
+      typeName: 'Mutation',
+      fieldName: 'syncBank',
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      code: appsync.Code.fromInline(LAMBDA_RESOLVER),
+    });
+
+    // ---------------------------------------------------------------------
     // 9. Cost guardrail — low budget alarm (free-tier safety net)
     //    Budgets ALERT, they do not hard-stop spend. This warns early, on both
     //    actual and forecasted cost, so anything beyond ~$1 pings you at once.
@@ -281,6 +328,20 @@ export class AutoExpenseStack extends cdk.Stack {
 // -------------------------------------------------------------------------
 // AppSync JS resolvers (kept as constants for readability)
 // -------------------------------------------------------------------------
+const LAMBDA_RESOLVER = `
+import { util } from '@aws-appsync/utils';
+export function request(ctx) {
+  return {
+    operation: 'Invoke',
+    payload: { field: ctx.info.fieldName, sub: ctx.identity.sub, args: ctx.args },
+  };
+}
+export function response(ctx) {
+  if (ctx.error) util.error(ctx.error.message, ctx.error.type);
+  return ctx.result;
+}
+`;
+
 const LIST_RESOLVER = `
 import { util } from '@aws-appsync/utils';
 export function request(ctx) {

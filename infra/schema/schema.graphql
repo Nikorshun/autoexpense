@@ -26,14 +26,33 @@ input ExpenseInput {
   createdAt: String
 }
 
+type BankConnection {
+  link: String!
+  requisitionId: String!
+}
+
+type SyncResult {
+  imported: Int!
+}
+
+type Institution {
+  id: String!
+  name: String!
+  logo: String
+  bic: String
+}
+
 type Query {
   listExpenses: [Expense!]!
+  listInstitutions(country: String!): [Institution!]!
 }
 
 type Mutation {
   createExpense(input: ExpenseInput!): Expense!
   updateExpense(id: ID!, input: ExpenseInput!): Expense!
   deleteExpense(id: ID!, date: String!): ID
+  connectBank(institutionId: String!): BankConnection!
+  syncBank(requisitionId: String!): SyncResult!
 }
 
 type Subscription {

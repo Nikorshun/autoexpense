@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { useExpenses } from './hooks/useExpenses';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { SummaryCards } from './components/SummaryCards';
 import { ExpenseList } from './components/ExpenseList';
+import { ConnectBankModal } from './components/ConnectBankModal';
 import { simulateIncomingExpense } from './utils/simulate';
+import { syncBank, takePendingRequisition } from './data/bankingService';
 import type { Expense } from './types';
 
 interface AppProps {
@@ -12,7 +15,28 @@ interface AppProps {
 
 export default function App({ signOut, userEmail }: AppProps) {
   const online = useOnlineStatus();
-  const { expenses, loading, error, add, update, remove, stats } = useExpenses();
+  const { expenses, loading, error, add, update, remove, refresh, stats } = useExpenses();
+  const [showConnect, setShowConnect] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // After a bank redirect, finish the Open Banking sync.
+  useEffect(() => {
+    const pending = takePendingRequisition();
+    if (!pending) return;
+    (async () => {
+      setNotice('Importing transactions from your bank…');
+      try {
+        const imported = await syncBank(pending);
+        setNotice(`Imported ${imported} transaction${imported === 1 ? '' : 's'} from your bank.`);
+        await refresh();
+        // tidy the ?ref=... the bank appended on redirect
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (e) {
+        console.error(e);
+        setNotice('Bank import failed. Check the backend secrets and try again.');
+      }
+    })();
+  }, [refresh]);
 
   const handleSimulate = async () => {
     await add(simulateIncomingExpense());
@@ -52,10 +76,17 @@ export default function App({ signOut, userEmail }: AppProps) {
               only handle the exceptions.
             </p>
           </div>
-          <button className="btn" onClick={handleSimulate}>
-            Simulate incoming receipt
-          </button>
+          <div className="head__actions">
+            <button className="btn btn--ghost" onClick={() => setShowConnect(true)}>
+              Connect bank
+            </button>
+            <button className="btn" onClick={handleSimulate}>
+              Simulate incoming receipt
+            </button>
+          </div>
         </div>
+
+        {notice && <p className="notice">{notice}</p>}
 
         <SummaryCards
           total={stats.total}
@@ -83,6 +114,8 @@ export default function App({ signOut, userEmail }: AppProps) {
           scoped to your account.
         </span>
       </footer>
+
+      {showConnect && <ConnectBankModal onClose={() => setShowConnect(false)} />}
     </div>
   );
 }

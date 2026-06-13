@@ -1,0 +1,12 @@
+{
+  "name": "Queue continue request",
+  "version": "1.0.0",
+  "description": "When Kiro finishes a turn, enqueue a 'needs continue' request for the Kiro Continue tray popup.",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "\"C:/Users/NikitaKorshunenkoMar/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/NikitaKorshunenkoMar/Documents/kiro stuff/Kiro-automation/signal.py\" --message \"Kiro finished a turn and is waiting for you.\""
+  }
+}
