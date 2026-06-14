@@ -6,14 +6,17 @@ import { ExpenseList } from './components/ExpenseList';
 import { ConnectBankModal } from './components/ConnectBankModal';
 import { simulateIncomingExpense } from './utils/simulate';
 import { syncBank, takePendingRequisition } from './data/bankingService';
+import type { Theme } from './hooks/useTheme';
 import type { Expense } from './types';
 
 interface AppProps {
   signOut?: () => void;
   userEmail?: string;
+  theme?: Theme;
+  onToggleTheme?: () => void;
 }
 
-export default function App({ signOut, userEmail }: AppProps) {
+export default function App({ signOut, userEmail, theme, onToggleTheme }: AppProps) {
   const online = useOnlineStatus();
   const { expenses, loading, error, add, update, remove, refresh, stats } = useExpenses();
   const [showConnect, setShowConnect] = useState(false);
@@ -58,6 +61,16 @@ export default function App({ signOut, userEmail }: AppProps) {
             <span className="conn__dot" aria-hidden="true" />
             {online ? 'Online · synced' : 'Offline'}
           </div>
+          {onToggleTheme && (
+            <button
+              className="btn btn--small btn--ghost btn--icon"
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title="Toggle theme"
+            >
+              {theme === 'dark' ? '☀' : '☾'}
+            </button>
+          )}
           {userEmail && <span className="user">{userEmail}</span>}
           {signOut && (
             <button className="btn btn--small btn--ghost" onClick={signOut}>
